@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { ProductItem } from '../../../entities/productItem'
 import styles from './ProductList.module.scss'
 import { useTelegram } from '../../../shared/hooks/useTelegram'
+import axios from 'axios'
 
 
 
@@ -16,8 +17,9 @@ export interface IProduct {
 
 
 export const ProductList = () => {
+  const [totalPrice, setTotalPice] = useState<number>()
   const [addedItems, setAddedItems] = useState<IProduct[]>([])
-  const {tg} = useTelegram()
+  const {tg, queryId} = useTelegram()
 
   const getTotalPrice = (items: IProduct[])=> {
     return items.reduce((sum, item)=> sum += item.price, 0)
@@ -25,17 +27,18 @@ export const ProductList = () => {
 
 
 const sendData = ()=> {
-  const data = {
-    products: addedItems,
-    totalPrice: getTotalPrice(addedItems)
-  }
-  fetch('http://localhost:5000', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'aplication/json',
-    },
-    body: JSON.stringify(data)
-  })
+    const data = {
+      products: addedItems,
+      totalPrice,
+      queryId
+    }
+   
+    axios('http://localhost:5000/bot', {
+      method: 'POST',
+      data
+    })
+  
+  
 }
 
 useEffect(()=> {
@@ -43,7 +46,7 @@ useEffect(()=> {
   tg.onEvent('mainButtonClicked', sendData)
   return ()=> tg.offEvent('mainButtonClicked', sendData)
 
-},[])
+},[totalPrice])
 
   const onAdd = (product: any)=> {
     const alreadyAdded = addedItems.find(item=> item.id === product.id)
@@ -54,21 +57,22 @@ useEffect(()=> {
       newItems = [...addedItems, product]
     }
     setAddedItems(newItems)
-   
-
   }
 
   useEffect(()=> {
+    const price = getTotalPrice(addedItems)
     if(addedItems.length === 0) {
       tg.MainButton.hide()
     } else {
       tg.MainButton.show()
       tg.MainButton.setParams({
-        text: `Купить ${getTotalPrice(addedItems)}`
+        text: `Купить ${totalPrice}`
       })
     }
-  },[addedItems])
+    setTotalPice(price)
+  },[addedItems, totalPrice])
 
+  
   const products = [
     {id: 1, title: 'Product 1', price: 8000, description: 'Green pants with pokets'},
     {id: 2, title: 'Product 2', price: 8000, description: 'Green pants with pokets'},

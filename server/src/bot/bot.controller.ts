@@ -6,7 +6,9 @@ export class BotController {
   constructor(private readonly botService: BotService) {}
 
   @Post()
-  gerData(@Body() body) {
-    
+  getData(@Body() body) {
+    console.log(body)
+    const {products, totalPrice, queryId} = body
+    this.botService.botQuery({products, totalPrice}, queryId)
   }
 }

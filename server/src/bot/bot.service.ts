@@ -51,6 +51,22 @@ export class BotService implements OnModuleInit {
 
         })
     }
+             
+    async botQuery(data: any, queryId: any) {
+        const {products, totalPrice} = data
+        try {
+            await this.bot.answerWebAppQuery(queryId, {
+                type: 'article',
+                id: queryId,
+                title: 'Успешная покупка',
+                input_message_content: {
+                    message_text: `Поздравляем с покупкой, вы преобрели товаров на сумму ${totalPrice}`
+                }
 
+            } )
+        } catch(e) {
+            console.error(e)
+        }
+    }
 
 }
