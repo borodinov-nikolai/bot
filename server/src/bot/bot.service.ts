@@ -6,27 +6,51 @@ import { DbService } from 'src/db/db.service';
 @Injectable()
 export class BotService implements OnModuleInit {
     private bot: IBot
-    constructor(private readonly db: DbService){
-        this.bot = new TelegramBot(process.env.BOT_API_TOKEN, {polling: true})
+    constructor(private readonly db: DbService) {
+        this.bot = new TelegramBot(process.env.TELEGRAM_BOT_API_TOKEN, { polling: true })
     }
 
-     onModuleInit() {
-        this.bot.on('message', async (msg)=> {
+    onModuleInit() {
+        this.bot.on('message', async (msg) => {
             const chatId = msg.chat.id
             const text = msg.text
-            const webAppUrl = 'https://9e00-95-167-152-146.ngrok-free.app'
-            if(text === '/start'){
+            const webAppUrl = process.env.TELEGRAM_MINI_APP_URL
+            if (text === '/start') {
                 await this.bot.sendMessage(chatId, 'Ниже появится кнопка, заполните форму', {
-                        reply_markup: {
-                            inline_keyboard: [
-                                [{text: 'Сделать заказ', web_app: {url: webAppUrl}}]
-                            ]
-                        }
+                    reply_markup: {
+                        keyboard: [
+                            [{ text: 'Заполнить форму', web_app: { url: webAppUrl + '/form' } }]
+                        ]
+                    }
+                })
+
+                await this.bot.sendMessage(chatId, 'Заходи в наш интернет магазин по кнопке ниже', {
+                    reply_markup: {
+                        inline_keyboard: [
+                            [{ text: 'Сделать заказ', web_app: { url: webAppUrl} }]
+                        ]
+                    }
                 })
             }
-            
+
+            if (msg?.web_app_data?.data) {
+                console.log(msg?.web_app_data?.data)
+                try {
+                    const data = JSON.parse(msg?.web_app_data?.data)
+                    await this.bot.sendMessage(chatId, 'Спасибо за обратную связь!')
+                    await this.bot.sendMessage(chatId, `Ваша страна: ${data?.country}`)
+                    await this.bot.sendMessage(chatId, `Ваша улица: ${data?.street}`)
+                    setTimeout(async () => {
+                        await this.bot.sendMessage(chatId, 'Всю информацию вы получите в этом чате')
+                    }, 3000)
+                } catch (e) {
+                    console.error(e)
+                }
+
+            }
+
         })
     }
-    
-   
+
+
 }
