@@ -1,0 +1,19 @@
+
+
+
+
+.root {
+    width: 100%;
+    height: max-content;
+    border: 1px solid var(--tg-theme-button-color);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.img {
+    width: 100%;
+    height: 150px;
+    background: var(--tg-theme-button-color);
+}

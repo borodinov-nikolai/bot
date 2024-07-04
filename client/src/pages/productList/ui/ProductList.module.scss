@@ -1,0 +1,15 @@
+
+
+
+
+.root {
+    padding: 10px;
+}
+
+
+.productsHolder {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-auto-rows: max-content;
+    gap: 10px;
+}
